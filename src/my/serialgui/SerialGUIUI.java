@@ -4,6 +4,7 @@ import com.fazecast.jSerialComm.*; // main serial lib
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import java.util.Scanner;
 import javax.swing.Timer;
 
 public class SerialGUIUI extends javax.swing.JFrame {
@@ -20,9 +21,13 @@ public class SerialGUIUI extends javax.swing.JFrame {
     // Timer to call the update method
     private Timer updateTimer;
     
-    byte[] readBuffer;
+    private boolean verbose = false;
+
+    private byte[] readBuffer;
     
-    boolean keepGoing = false;
+    private String serialString = "";
+
+    private boolean keepGoing = false;
 
     // This is what gets called when the timer is up
     // This is where you do the constant updating
@@ -36,21 +41,28 @@ public class SerialGUIUI extends javax.swing.JFrame {
                     // Create buffer array
                     readBuffer = new byte[p.bytesAvailable()];
                     // Read data into buffer
-                    int numRead = p.readBytes(readBuffer, readBuffer.length);
+                    p.readBytes(readBuffer, readBuffer.length);
+                    // turn buffer into string
+                    String bufferString = new String(readBuffer);
+                    // append to reader string
+                    serialString += bufferString;
                     
-                    boolean haveLine = false;
-                    for(int i = 0; i < readBuffer.length; i++){
-                        if(readBuffer[i] == '\n'){
-                            haveLine = true;
-                            break;
-                        }
-                    }
-                    if(haveLine){
+                    if(serialString.indexOf('\n') > 0){
                         
+                        // make new string to parse from 
+                        String lineString = serialString.substring(0, serialString.indexOf('\n'));
                         
+                        // take first line off of string
+                        serialString = serialString.substring(serialString.indexOf('\n'));
                         
-                    }else{
+                        if(verbose) statusText.append("Got a whole line: "+ lineString +"\n");
                         
+                        // make scanner to parse
+                        Scanner lineScanner = new Scanner(serialString);
+                        
+                        // set alt display
+                        String altString = lineScanner.next();
+                        altitudeDisplayText.setText(altString);
                     }
                 }
             } catch (Exception e) {
@@ -60,6 +72,8 @@ public class SerialGUIUI extends javax.swing.JFrame {
 
     public SerialGUIUI() {
         initComponents();
+        
+        disconnectButtonActionPerformed(null);
 
         // Initialize timer with 20ms period, to call the updater object
         updateTimer = new Timer(20, updater);
@@ -86,7 +100,7 @@ public class SerialGUIUI extends javax.swing.JFrame {
         connectButton = new javax.swing.JButton();
         portSelector = new javax.swing.JComboBox<>();
         jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        altitudeDisplayText = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMaximumSize(new java.awt.Dimension(700, 500));
@@ -97,14 +111,29 @@ public class SerialGUIUI extends javax.swing.JFrame {
         autoManulText.setToolTipText("");
 
         manualButton.setText("Manual");
+        manualButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                manualButtonActionPerformed(evt);
+            }
+        });
 
         autoButton.setText("Auto");
+        autoButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                autoButtonActionPerformed(evt);
+            }
+        });
 
         armedDisarmedText.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         armedDisarmedText.setText("Disarmed");
         armedDisarmedText.setToolTipText("");
 
         armButton.setText("Arm");
+        armButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                armButtonActionPerformed(evt);
+            }
+        });
 
         disarmButton.setText("Disarm");
         disarmButton.addActionListener(new java.awt.event.ActionListener() {
@@ -121,58 +150,74 @@ public class SerialGUIUI extends javax.swing.JFrame {
         });
 
         habsButton.setText("Habs");
+        habsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                habsButtonActionPerformed(evt);
+            }
+        });
 
         waterButton.setText("Water");
+        waterButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                waterButtonActionPerformed(evt);
+            }
+        });
 
         statusText.setColumns(20);
         statusText.setRows(5);
         jScrollPane1.setViewportView(statusText);
 
         disconnectButton.setText("Disconnect");
-
-        connectButton.setText("Connect");
-
-        portSelector.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        portSelector.addActionListener(new java.awt.event.ActionListener() {
+        disconnectButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                portSelectorActionPerformed(evt);
+                disconnectButtonActionPerformed(evt);
             }
         });
 
+        connectButton.setText("Connect");
+        connectButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                connectButtonActionPerformed(evt);
+            }
+        });
+
+        portSelector.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
         jLabel1.setText("Altitude:");
 
-        jLabel2.setText("jLabel2");
+        altitudeDisplayText.setText("--");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 366, Short.MAX_VALUE)
+                .addComponent(altitudeDisplayText)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 395, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(armedDisarmedText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(armButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(disarmButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(12, 12, 12)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(autoManulText, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(manualButton, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE)
-                            .addComponent(autoButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(habsButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(waterButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(gliderButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(connectButton, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(disconnectButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(portSelector, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(armedDisarmedText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(armButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(disarmButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGap(12, 12, 12)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(autoManulText, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(manualButton, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE)
+                                .addComponent(autoButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(habsButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(waterButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(gliderButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createSequentialGroup()
+                            .addComponent(connectButton, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(disconnectButton, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE))
+                        .addComponent(portSelector, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -183,7 +228,7 @@ public class SerialGUIUI extends javax.swing.JFrame {
                     .addComponent(autoManulText)
                     .addComponent(armedDisarmedText)
                     .addComponent(jLabel1)
-                    .addComponent(jLabel2))
+                    .addComponent(altitudeDisplayText))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(manualButton)
@@ -212,17 +257,91 @@ public class SerialGUIUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void gliderButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gliderButtonActionPerformed
+    private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
+        statusText.append("Opening Port\n");
+        
+        // Find which port is selected in the drop-down
+        int portSelection = portSelector.getSelectedIndex();
+        
+        // Extract from array to make it easier
+        p = ports[portSelection];
+        
+        // A li'l error checking
+        if (p.isOpen()) {
+            statusText.append("Port already open\n");
+            return;
+        }
+        
+        // 
+        int selectedBaud = Integer.parseInt("9600");
+        
+        // Open port with baud rate.
+        p.openPort();
+        p.setBaudRate(selectedBaud);
+        
+        serialString = "";
+        
+        if(verbose) statusText.append("Opened Port at " + selectedBaud + " bps\n");
+
+        // Start timer after 50ms
+        updateTimer.setInitialDelay(50);
+        updateTimer.start();
+    }//GEN-LAST:event_connectButtonActionPerformed
+
+    private void disconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disconnectButtonActionPerformed
+
+        if (p != null && p.isOpen()) {
+            // close port
+            if(verbose) statusText.append("Closing port\n");
+            p.closePort();
+            statusText.append("Port closed\n");
+            updateTimer.stop();
+        } else {
+            // scan ports
+            statusText.append("Scanning ports\n");
+
+            // Remove all the old ports from the list
+            portSelector.removeAllItems();
+
+            // Update ports array
+            ports = SerialPort.getCommPorts();
+
+            // Add each port to the drop-down
+            for (SerialPort port : ports) {
+                portSelector.addItem(port.getDescriptivePortName());
+            }
+
+            if(verbose) statusText.append("Done scanning\n");
+        }
+    }//GEN-LAST:event_disconnectButtonActionPerformed
+
+    private void armButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_armButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_gliderButtonActionPerformed
+    }//GEN-LAST:event_armButtonActionPerformed
 
     private void disarmButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_disarmButtonActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_disarmButtonActionPerformed
 
-    private void portSelectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_portSelectorActionPerformed
+    private void manualButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_manualButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_portSelectorActionPerformed
+    }//GEN-LAST:event_manualButtonActionPerformed
+
+    private void autoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_autoButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_autoButtonActionPerformed
+
+    private void gliderButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gliderButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_gliderButtonActionPerformed
+
+    private void waterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_waterButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_waterButtonActionPerformed
+
+    private void habsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_habsButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_habsButtonActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -265,6 +384,7 @@ public class SerialGUIUI extends javax.swing.JFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel altitudeDisplayText;
     private javax.swing.JButton armButton;
     private javax.swing.JLabel armedDisarmedText;
     private javax.swing.JButton autoButton;
@@ -275,7 +395,6 @@ public class SerialGUIUI extends javax.swing.JFrame {
     private javax.swing.JButton gliderButton;
     private javax.swing.JButton habsButton;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton manualButton;
