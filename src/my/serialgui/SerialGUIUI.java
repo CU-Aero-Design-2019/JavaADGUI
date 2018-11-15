@@ -90,7 +90,6 @@ public class SerialGUIUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMaximumSize(new java.awt.Dimension(700, 500));
-        setPreferredSize(new java.awt.Dimension(700, 500));
         setResizable(false);
 
         autoManulText.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
