@@ -1,6 +1,7 @@
 package my.serialgui;
 
 import com.fazecast.jSerialComm.*; // main serial lib
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
@@ -37,35 +38,35 @@ public class SerialGUIUI extends javax.swing.JFrame {
         public void actionPerformed(ActionEvent ae) {
             try {
                 // If the port has data to read
-                if (p.bytesAvailable() != 0) {
+                if (p.bytesAvailable() > 0) {
                     // Create buffer array
                     readBuffer = new byte[p.bytesAvailable()];
                     // Read data into buffer
                     p.readBytes(readBuffer, readBuffer.length);
                     // turn buffer into string
                     String bufferString = new String(readBuffer);
-                    // append to reader string
+                    
                     serialString += bufferString;
                     
-                    if(serialString.indexOf('\n') > 0){
-                        
-                        // make new string to parse from 
-                        String lineString = serialString.substring(0, serialString.indexOf('\n'));
-                        
-                        // take first line off of string
-                        serialString = serialString.substring(serialString.indexOf('\n'));
-                        
-                        if(verbose) statusText.append("Got a whole line: "+ lineString +"\n");
-                        
-                        // make scanner to parse
+                    if(serialString.indexOf('!') > 0){
                         Scanner lineScanner = new Scanner(serialString);
+                        serialString = serialString.substring(serialString.indexOf('!')+1);
                         
-                        // set alt display
-                        String altString = lineScanner.next();
-                        altitudeDisplayText.setText(altString);
+                        lineScanner.nextInt();
+                        lineScanner.nextInt();
+                        lineScanner.nextDouble();
+                        lineScanner.nextDouble();
+                        double alt = lineScanner.nextDouble();
+                        
+                        altitudeDisplayText.setText(Double.toString(alt));
+                        
+                        if(alt < -10){
+                            System.out.println("ok");
+                        }
                     }
                 }
             } catch (Exception e) {
+                System.out.println("Something happened");
             }
         }
     }
@@ -74,9 +75,12 @@ public class SerialGUIUI extends javax.swing.JFrame {
         initComponents();
         
         disconnectButtonActionPerformed(null);
+        
+        altitudeDisplayText.setFont(new Font("big", 1, 70));
+        altitudeLabel.setFont(new Font("big?", 1, 70));
 
         // Initialize timer with 20ms period, to call the updater object
-        updateTimer = new Timer(20, updater);
+        updateTimer = new Timer(1000, updater);
     }
 
     //DONT TOUCH! GUI STUFF!
@@ -99,7 +103,7 @@ public class SerialGUIUI extends javax.swing.JFrame {
         disconnectButton = new javax.swing.JButton();
         connectButton = new javax.swing.JButton();
         portSelector = new javax.swing.JComboBox<>();
-        jLabel1 = new javax.swing.JLabel();
+        altitudeLabel = new javax.swing.JLabel();
         altitudeDisplayText = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -183,7 +187,7 @@ public class SerialGUIUI extends javax.swing.JFrame {
 
         portSelector.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        jLabel1.setText("Altitude:");
+        altitudeLabel.setText("Altitude:");
 
         altitudeDisplayText.setText("--");
 
@@ -193,31 +197,30 @@ public class SerialGUIUI extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
+                .addComponent(altitudeLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(altitudeDisplayText)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 395, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(armedDisarmedText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(armButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(disarmButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGap(12, 12, 12)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(autoManulText, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(manualButton, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE)
-                                .addComponent(autoButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                        .addComponent(habsButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(waterButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(gliderButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(connectButton, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(disconnectButton, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE))
-                        .addComponent(portSelector, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(armedDisarmedText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(armButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(disarmButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(12, 12, 12)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(autoManulText, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(manualButton, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE)
+                            .addComponent(autoButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(habsButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(waterButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(gliderButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(connectButton, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(disconnectButton, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE))
+                    .addComponent(portSelector, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -227,7 +230,7 @@ public class SerialGUIUI extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(autoManulText)
                     .addComponent(armedDisarmedText)
-                    .addComponent(jLabel1)
+                    .addComponent(altitudeLabel)
                     .addComponent(altitudeDisplayText))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -258,7 +261,7 @@ public class SerialGUIUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
-        statusText.append("Opening Port\n");
+        //statusText.append("Opening Port\n");
         
         // Find which port is selected in the drop-down
         int portSelection = portSelector.getSelectedIndex();
@@ -279,12 +282,16 @@ public class SerialGUIUI extends javax.swing.JFrame {
         p.openPort();
         p.setBaudRate(selectedBaud);
         
-        serialString = "";
+        if(p.isOpen()){
+            serialString = "";
         
-        if(verbose) statusText.append("Opened Port at " + selectedBaud + " bps\n");
+            statusText.append("Opened Port at " + selectedBaud + " bps\n");
+        }else{
+            statusText.append("Error opening port");
+        }
 
         // Start timer after 50ms
-        updateTimer.setInitialDelay(50);
+        updateTimer.setInitialDelay(1000);
         updateTimer.start();
     }//GEN-LAST:event_connectButtonActionPerformed
 
@@ -302,13 +309,16 @@ public class SerialGUIUI extends javax.swing.JFrame {
 
             // Remove all the old ports from the list
             portSelector.removeAllItems();
-
-            // Update ports array
+            
             ports = SerialPort.getCommPorts();
 
             // Add each port to the drop-down
             for (SerialPort port : ports) {
                 portSelector.addItem(port.getDescriptivePortName());
+            }
+            
+            if(ports.length > 1){
+                portSelector.setSelectedIndex(1);
             }
 
             if(verbose) statusText.append("Done scanning\n");
@@ -385,6 +395,7 @@ public class SerialGUIUI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel altitudeDisplayText;
+    private javax.swing.JLabel altitudeLabel;
     private javax.swing.JButton armButton;
     private javax.swing.JLabel armedDisarmedText;
     private javax.swing.JButton autoButton;
@@ -394,7 +405,6 @@ public class SerialGUIUI extends javax.swing.JFrame {
     private javax.swing.JButton disconnectButton;
     private javax.swing.JButton gliderButton;
     private javax.swing.JButton habsButton;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton manualButton;

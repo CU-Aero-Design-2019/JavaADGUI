@@ -37,36 +37,34 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+              <Component id="altitudeLabel" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="altitudeDisplayText" min="-2" max="-2" attributes="0"/>
               <EmptySpace pref="395" max="32767" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Component id="jScrollPane1" pref="229" max="32767" attributes="0"/>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Group type="102" alignment="1" attributes="0">
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="armedDisarmedText" alignment="0" max="32767" attributes="0"/>
-                              <Component id="armButton" alignment="0" max="32767" attributes="0"/>
-                              <Component id="disarmButton" alignment="0" max="32767" attributes="0"/>
-                          </Group>
-                          <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Component id="autoManulText" alignment="1" max="32767" attributes="0"/>
-                              <Component id="manualButton" pref="108" max="32767" attributes="0"/>
-                              <Component id="autoButton" alignment="1" max="32767" attributes="0"/>
-                          </Group>
+                  <Group type="102" alignment="1" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="armedDisarmedText" alignment="0" max="32767" attributes="0"/>
+                          <Component id="armButton" alignment="0" max="32767" attributes="0"/>
+                          <Component id="disarmButton" alignment="0" max="32767" attributes="0"/>
                       </Group>
-                      <Component id="habsButton" alignment="1" max="32767" attributes="0"/>
-                      <Component id="waterButton" alignment="1" max="32767" attributes="0"/>
-                      <Component id="gliderButton" alignment="1" max="32767" attributes="0"/>
-                      <Group type="102" alignment="0" attributes="0">
-                          <Component id="connectButton" min="-2" pref="117" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="disconnectButton" pref="106" max="32767" attributes="0"/>
+                      <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="autoManulText" alignment="1" max="32767" attributes="0"/>
+                          <Component id="manualButton" pref="108" max="32767" attributes="0"/>
+                          <Component id="autoButton" alignment="1" max="32767" attributes="0"/>
                       </Group>
-                      <Component id="portSelector" max="32767" attributes="0"/>
                   </Group>
+                  <Component id="habsButton" alignment="1" max="32767" attributes="0"/>
+                  <Component id="waterButton" alignment="1" max="32767" attributes="0"/>
+                  <Component id="gliderButton" alignment="1" max="32767" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="connectButton" min="-2" pref="117" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="disconnectButton" pref="106" max="32767" attributes="0"/>
+                  </Group>
+                  <Component id="portSelector" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -79,7 +77,7 @@
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="autoManulText" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="armedDisarmedText" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="altitudeLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="altitudeDisplayText" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -229,7 +227,7 @@
         <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
       </AuxValues>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabel1">
+    <Component class="javax.swing.JLabel" name="altitudeLabel">
       <Properties>
         <Property name="text" type="java.lang.String" value="Altitude:"/>
       </Properties>
